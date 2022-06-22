@@ -1,0 +1,274 @@
+{% extends "layout.html" %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.css" />
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+
+<style>
+    h3 {
+        font-size: x-large;
+        color: rgb(203, 122, 0);
+    }
+
+    form {
+        margin-top: 20px;
+    }
+
+    .form-field {
+        font-size: large;
+        vertical-align: top;
+    }
+
+    .form-field>label {
+        width: 250px;
+        font-weight: bold;
+        vertical-align: top;
+    }
+
+    .form-field span {
+        display: inline-block;
+    }
+
+    .half-panel {
+        display: inline-block;
+        width: 48%;
+        vertical-align: top;
+        padding: 2px;
+    }
+
+    .half-panel input[type='checkbox'] {
+        size: 20px;
+    }
+
+    .half-panel input[type='checkbox']+label {
+        padding-left: 10px;
+        font-size: large;
+    }
+
+    .half-panel input[type='checkbox']:checked+label {
+        font-weight: bold;
+    }
+
+    .small-font {
+        font-size: xx-small !important;
+    }
+
+    #errorMessage {
+        color: red;
+        font-weight: bold;
+    }
+
+    .edit-dialog {
+        border: 1px dashed black;
+        padding: 5px;
+    }
+
+    input[type='text'],
+    textarea {
+        width: 60%;
+    }
+
+    .action-link {
+        font-size: medium;
+    }
+
+    .outstanding_indicator {
+        font-size: x-large;
+        float: right;
+    }
+
+    .outstanding_indicator span {
+        font-weight: bold;
+        color: rgb(252, 143, 143);
+    }
+
+    .inline-button {
+        padding: 3px;
+        background-color: rgb(0, 36, 154);
+        color: white;
+        font-weight: bold;
+    }
+
+    .inline-button:hover {
+        background-color: rgb(93, 107, 154);
+    }
+
+    #title {
+        font-size: large;
+        font-weight: bold;
+        color: rgb(0, 71, 125);
+    }
+
+    .panel-border {
+        border: 1px solid black;
+        padding: 10px;
+    }
+</style>
+
+<div id="loader" style="display: none;">
+    <img src="/images/spinner.gif" width=50 height=50 />
+</div>
+
+<h2>Add a new custom paper</h2>
+
+<div>
+    <div>Please search existing repository before adding this paper.</div>
+    <br />
+
+    <table id="search_results" class="hover row-border" style="width: 100%;">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>DOI</th>
+            </tr>
+        </thead>
+    </table>
+
+</div>
+
+<form action="{{ url_for('submit_custom_paper_item') }}" method="POST" enctype="multipart/form-data"
+    onsubmit="return validateFields();" id="new_paper_form">
+
+    <div class="panel-border" style="margin-top: 30px;">
+        <h3>New paper</h3>
+        <div class="form-field">
+            <label for="parent_paper_id">Parent Paper ID</label>
+            <input type="text" name="parent_paper_id"
+                value="{{ article.parent_paper_id if article.parent_paper_id  }}"></input>
+        </div>
+
+        <div class="form-field">
+            <label for="title">Title</label>
+            <input type="text" name="title" value="{{ article.title if article.title  }}"></input>
+        </div>
+
+        <div class="form-field">
+            <label for="authors">Authors</label>
+            <input type="text" name="authors" value="{{ article.authors if article.authors }}"></input>
+        </div>
+
+        <div class="form-field">
+            <label for="doi">DOI</label>
+            <input type="text" name="doi" value="{{ article.doi if article.doi }}"></input>
+        </div>
+
+        <div class="form-field">
+            <label for="published_year">Published Year</label>
+            <input type="number" size="4" maxlength="4" name="published_year"
+                value="{{ article.published_year if article.published_year  }}"></input>
+        </div>
+
+        <button>Add New</button>
+    </div>
+
+    <hr />
+
+    <span id="errorMessage"></span><br />
+
+
+
+</form>
+
+{% block javascript %}
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+    crossorigin="anonymous"></script>
+<script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+    integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E=" crossorigin="anonymous"></script>
+
+<script>
+
+    function validateFields() {
+        $("#errorMessage").html("");
+
+        if ($("#new_paper_form input[name = 'parent_paper_id']").val() == "") {
+            $("#errorMessage").html("Parent paper ID cannot be emptyd.");
+            return false;
+        }
+
+        if ($("#new_paper_form input[name = 'title']").val() == "" && $("#new_paper_form input[name = 'doi']").val() == "") {
+            $("#errorMessage").html("Title and DOI cannot be both empty.");
+            return false;
+        }
+
+        return true;
+    }
+
+    var getUrlParameter = function getUrlParameter(sParam) {
+        var sPageURL = window.location.search.substring(1),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+            }
+        }
+        return false;
+    };
+
+    $(document).ready(function () {
+        $('#search_results').DataTable({
+            "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+            bProcessing: true,
+            bServerSide: true,
+            sPaginationType: "full_numbers",
+            bjQueryUI: true,
+            dataSrc: '',
+            sAjaxSource: '/scopus-query-data',
+            columns: [
+                { "data": "id" },
+                { "data": "title" },
+                { "data": "published_year" },
+                { "data": "doi" }
+            ],
+            rowCallback: function (row, data, index) {
+                if (data.decision) {
+                    $(row).addClass(data.decision.toLowerCase());
+                }
+            }
+        });
+
+        $("#new_paper_form").submit(function (e) {
+            e.preventDefault();
+
+            var form = $(this);
+            var url = form.attr('action');
+
+            $.ajax({
+                type: "POST",
+                url: url,
+                data: form.serialize(), // serializes the form's elements.
+                success: function (data) {
+                    var parentPaperIdElem = $("#new_paper_form input[name = 'parent_paper_id']")
+                    var parentPaperId = parentPaperIdElem.val()
+
+                    $("#new_paper_form")[0].reset();
+                    parentPaperIdElem.val(parentPaperId);
+
+                    $('#search_results').DataTable().ajax.reload(null, false);
+
+                    response = JSON.parse(data);
+                    alert("New paper is saved with new ID: " + response['newPaperId']);
+                }
+            });
+
+        });
+
+        var parentPaperIdParam = getUrlParameter("parentPaperId");
+        if (parentPaperIdParam && parentPaperIdParam != "") {
+            $("#new_paper_form input[name = 'parent_paper_id']").val(parentPaperIdParam)
+        }
+
+    });
+
+</script>
+{% endblock %}
+
+{% endblock %}

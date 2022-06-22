@@ -1,0 +1,200 @@
+{% extends "layout.html" %}
+{% block content %}
+
+    <style>
+        form {
+            margin-top: 20px;
+        }
+
+        .form-field {
+            font-size: x-large;
+        }
+
+        .form-field > label {
+            width: 200px;
+            font-weight: bold;
+        }
+
+        .form-field span {
+            display: inline-block;
+        }
+
+        #errorMessage {
+            color: red;
+            font-weight: bold;
+        }
+
+        .outstanding_indicator {
+            font-size: x-large;
+            float: right;
+        }
+
+        .outstanding_indicator span {
+            font-weight: bold;
+            color: rgb(252, 143, 143);
+        }
+    </style>
+
+    {% if total_maybe is defined %}
+        <div class="outstanding_indicator">Outstanding (Maybe): <span>{{ total_maybe }}</span></div>        
+    {% endif %}
+
+    {% if total_reject_reason is defined %}
+        <div class="outstanding_indicator">Outstanding (Reject w/o reason): <span>{{ total_reject_reason }}</span></div>        
+    {% endif %}
+
+    <form action="{{ url_for('submit_scopus_item') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateFields();">
+        <div class="form-field">
+            <label for="id">ID</label>
+            <span id="id">{{ article.id }}</span><br/>
+        </div>
+
+        <div class="form-field">
+            <label for="doi">DOI</label>
+            <span id="doi">{{ article.doi | safe}}</span><br/>
+        </div>
+
+        <div class="form-field">
+            <label for="title">Published Year</label>
+            <span id="title">{{ article.published_year }}</span>
+        </div>
+
+        <div class="form-field">
+            <label for="title">Title</label>
+            <span id="title">{{ article.title }}</span>
+        </div>
+
+        <div class="form-field">
+            <label for="description">Description</label>
+            <span id="description">{{ article.description }}</span>
+        </div>
+
+        <hr/>
+
+        <div class="form-field">
+            <label>Decision</label>
+            
+            <input type="radio" id="r_pass" value="Pass" name="decision" {{ 'checked' if article.decision == 'Pass' else '' }}>
+            <label for="r_pass">Pass</label>
+
+            <input type="radio" id="r_maybe" value="Maybe" name="decision" {{ 'checked' if article.decision == 'Maybe' else '' }}>
+            <label for="r_maybe">Maybe</label>
+
+            <input type="radio" id="r_reject" value="Reject" name="decision" {{ 'checked' if article.decision == 'Reject' else '' }}>
+            <label for="r_reject">Reject</label>
+
+            <input type="radio" id="r_reject_second" value="Reject-Second" name="decision" {{ 'checked' if article.decision == 'Reject-Second' else '' }}>
+            <label for="r_reject_second">Reject-Second Pass</label>
+        </div>
+
+        <div class="form-field" id="reject_reason_div" style="display: none;">
+            <label for="reject_reason">Rejection Reason</label>
+            <select name="reject_reason" multiple>
+                <option value="">--- Please select ---</option>
+                <option value="POP_ADOLESCENT">Population - Adolescent</option>
+                <option value="POP_CHILDREN">Population - Children</option>
+                <option value="POP_COUNTRIES">Population - Other Countries</option>
+                <option value="POP_NON_COMMUNITY">Population - Non community dwellers</option>
+                <option value="POP_SCHOOL">Population - School (up to High School)</option>
+                <option value="INSTR_NON_ENGLISH">Instrument - Non-English</option>
+                <option value="INSTR_NON_DIGITAL">Instrument - Non-Digital</option>
+                <option value="INSTR_NOT_REPEAT">Instrument - Not Repeated</option>
+                <option value="INSTR_NOT_SELF_REPORT">Instrument - Not Self-Report</option>
+                <option value="OTHER_DUPLICATE">Other - Duplicate</option>
+                <option value="OTHER_404">Other - Paper Not Found</option>
+                <option value="OTHER_REASONS">Other - Specific Reasons</option>
+                <option value="STUDY_PILOT">Study - Feasibility/Pilot/Exploratory</option>
+                <option value="STUDY_IRRELEVANT">Study - Irrelevant</option>
+                <option value="STUDY_CASE_REPORT">Study - Case Report</option>
+                <option value="STUDY_NON_ENGLISH">Study - Non-English</option>
+                <option value="STUDY_OTHER_ARTICLES">Study - Opinions, Conceptual, Theoretical Articles, Brief Report</option>
+                <option value="STUDY_PROTOCOL">Study - Protocol</option>
+                <option value="STUDY_QUALITATIVE">Study - Qualitative</option>
+                <option value="STUDY_SECOND_ANALYSIS">Study - Secondary Analysis</option>
+                <option value="_UNKNW_INSTR_LANG">Follow-up - Unknown Instrument Language</option>
+                <option value="_UNKNW_IN_OUT">Follow-up - Grey List</option>
+            </select>
+        </div>   
+        
+        <div class="form-field">
+            <label for="comment">Comment</label>
+            <textarea name="comment" rows="3" cols="80">{{ article.comment }}</textarea>
+        </div>   
+
+        <input type="hidden" value="{{ article.id }}" name="id" />
+        <hr/>
+
+        <span id="errorMessage"></span><br/>
+
+        <button>Submit</button>
+    </form>
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script>
+    function validateFields() {
+        var decision = $("input[name='decision']:checked").val();
+        if (!decision || decision == "") {
+            $("#errorMessage").html("Decision is not selected.");
+            return false;
+        } 
+
+        return true;
+    }
+
+    $(document).keydown(function(event) {
+        if (event.metaKey && (event.which == 49 || event.which == 50 || event.which == 51 || event.which == 52)) {
+            if (event.which == 49) {
+                $("#r_pass").prop("checked", true);
+                $("#r_pass").trigger("change");
+            } else if (event.which == 50) {
+                $("#r_maybe").prop("checked", true);
+                $("#r_maybe").trigger("change");
+            } else if (event.which == 51) {
+                $("#r_reject").prop("checked", true);
+                $("#r_reject").trigger("change");
+            } else if (event.which == 52) {
+                $("#r_reject_second").prop("checked", true);
+                $("#r_reject_second").trigger("change");
+            }
+
+            event.preventDefault();
+            return false;
+        };
+        }
+    );    
+
+    $(document).ready(function() {
+
+        $("#r_pass").change(function() {
+            $("#reject_reason_div").hide();
+        });
+
+        $("#r_maybe").change(function() {
+            $("#reject_reason_div").hide();
+        });
+
+        $("#r_reject, #r_reject_second").change(function() {
+            $("#reject_reason_div").show();
+        });
+
+        var decision = $("input[name='decision']:checked").val()
+        if (decision && (decision == "Reject" || decision == "Reject-Second")) {
+            var reject_reasons = '{{ article.reject_reason }}';
+            $.each(reject_reasons.split(","), function(i, e) {
+                $("select[name='reject_reason'] option[value='" + e.trim() + "']").prop("selected", true);
+            });
+
+            $("#reject_reason_div").show();
+        } else {
+            $('form input').first().focus();
+        }
+    } );
+
+    
+  </script>
+  {% endblock %}
+
+{% endblock %}

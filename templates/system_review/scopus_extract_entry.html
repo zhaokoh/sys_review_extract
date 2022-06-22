@@ -1,0 +1,658 @@
+{% extends "layout.html" %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+
+    <style>
+        h3 {
+            font-size: x-large;
+            color:rgb(203, 122, 0);
+        }
+
+        h4 {
+            font-size: large;
+            font-weight: bold;
+            color: grey;
+            padding-top: 15px;
+        }
+        
+        form {
+            margin-top: 20px;
+        }
+
+        .form-field {
+            font-size: large;
+            vertical-align: top;
+        }
+
+        .form-field > label {
+            width: 250px;
+            font-weight: bold;
+            vertical-align: top;
+        }
+
+        .form-field span {
+            display: inline-block;
+        }
+
+        .half-panel {
+            display: inline-block;
+            width: 48%;
+            vertical-align: top;
+            padding: 2px;
+        }
+
+        .half-panel input[type='checkbox'] {
+            size: 20px;
+        }
+
+        .half-panel input[type='checkbox'] + label {
+            padding-left: 10px;
+            font-size: large;
+        }
+
+        .half-panel input[type='checkbox']:checked + label {
+            font-weight: bold;
+        }
+
+        .small-font {
+            font-size: xx-small !important;
+        }
+
+        #errorMessage {
+            color: red;
+            font-weight: bold;
+        }
+
+        .edit-dialog {
+            border: 1px dashed black;
+            padding: 5px;
+        }
+
+        input[type='text'], textarea {
+            width: 60%;
+        }
+
+        .action-link {
+            font-size: medium;
+        }
+
+        .outstanding_indicator {
+            font-size: x-large;
+            float: right;
+        }
+
+        .outstanding_indicator span {
+            font-weight: bold;
+            color: rgb(252, 143, 143);
+        }
+
+        .inline-button {
+            padding: 3px;
+            background-color:rgb(0, 36, 154); 
+            color: white; 
+            font-weight: bold;
+        }
+
+        .inline-button:hover {
+            background-color:rgb(93, 107, 154); 
+        }
+
+        #title {
+            font-size: x-large;
+            font-weight: bold;
+            color:rgb(0, 71, 125);
+        }
+
+        .instruction {
+            color: grey;
+        }
+
+        button {
+            margin: 10px 0 25px 0; 
+            padding: 5px 10px 5px 10px; 
+            border: none;           
+        }
+
+        button.reject {
+            background-color: rgb(181, 42, 42); 
+            color: white; 
+        }
+
+        button.next, button.submit {
+            background-color: rgb(35, 111, 41); 
+            color: white; 
+        }
+
+        button.save {
+            background-color: rgb(0, 66, 147); 
+            color: white; 
+        }
+
+        ::placeholder {
+            font-size: small;
+            color: grey;
+        }
+
+        .ui-dialog-titlebar {
+            display: none;
+        }
+
+    </style>
+
+    {% if total_extract_outstanding is defined %}
+    <div class="outstanding_indicator">Outstanding (Extract): <span>{{ total_extract_outstanding }}</span></div>        
+    {% endif %}
+
+
+    <form id="main_form" action="{{ url_for('submit_extract_item') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateFields();">       
+        
+        <div id="loader" style="display: none;">
+            <img src="/images/spinner.gif" width=50 height=50/>
+        </div>
+        <div>
+            <div class="form-field">
+                <span id="title">{{ article.title }} ({{ article.published_year }}) {{ article.doi | safe}}</span>
+            </div>
+        </div>
+
+        <hr />
+
+        <div id="first-page">
+            <h3>Step 1 - Decide if this article is eligible based on the criteria below?</h3>
+            <p class="instruction">Please tick each checkbox below to confirm the article satisfies the inclusion criteria.</p>
+        
+            <div class="half-panel">
+
+                <h4>Population</h4>
+
+                <input type="checkbox" id="cri_adults" name="cri_adults" {% if article.cri_adults==1 %}checked{% endif %}/>
+                <label for="cri_adults">Adults aged 18+ OR majority are adults?</label><br/>
+
+                <input type="checkbox" id="cri_comm_dwellers" name="cri_comm_dwellers" {% if article.cri_comm_dwellers==1 %}checked{% endif %}/>
+                <label for="cri_comm_dwellers">Community dwellers?</label><br/>
+
+                <h4>Article types</h4>
+
+                <input type="checkbox" id="cri_article_peer_review" name="cri_article_peer_review" {% if article.cri_article_peer_review==1 %}checked{% endif %}/>
+                <label for="cri_article_peer_review">Peer-reviewed journal articles or book chapters?</label><br/>
+
+                <input type="checkbox" id="cri_article_english" name="cri_article_english" {% if article.cri_article_english==1 %}checked{% endif %}/>
+                <label for="cri_article_english">Published in English?</label><br/>
+
+                <h4>Study Design</h4>
+
+                <input type="checkbox" id="cri_quan_emp_study" name="cri_quan_emp_study" {% if article.cri_quan_emp_study==1 %}checked{% endif %}/>
+                <label for="cri_quan_emp_study">Quantitative empirical studies OR reviews?</label><br/>
+
+                <input type="checkbox" id="cri_repeated_instr" name="cri_repeated_instr" {% if article.cri_repeated_instr==1 %}checked{% endif %}/>
+                <label for="cri_repeated_instr">Has at least one instrument that matches ALL of the following:</label>
+                <ul>
+                    <li>Administered more than one time points?</li>
+                    <li>Self-report?</li>
+                    <li>Digital?</li>
+                    <li>Measure relevant mental health constructs?</li>
+                </ul>
+                
+            </div>
+
+            <div class="half-panel">
+                <input type="checkbox" id="r_reject_second" name="r_reject_second"  value="Reject-Second" {% if article.cri_r_reject_second==1 %}checked{% endif %}>
+                <label for="r_reject_second">I want to reject this article because it does not satisfy all criteria.</label><br/>
+
+                <div class="form-field" id="reject_reason_div" style="display: none;">
+                    <label for="reject_reason">Rejection Reason</label>
+                    <select name="reject_reason">
+                        <option value="">--- Please select ---</option>
+                        <option value="POP_ADOLESCENT">Population - Adolescent</option>
+                        <option value="POP_CHILDREN">Population - Children</option>
+                        <option value="POP_COUNTRIES">Population - Other Countries</option>
+                        <option value="POP_NON_COMMUNITY">Population - Non community dwellers</option>
+                        <option value="POP_SCHOOL">Population - School (up to High School)</option>
+                        <option value="INSTR_NON_ENGLISH">Instrument - Non-English</option>
+                        <option value="INSTR_NON_DIGITAL">Instrument - Non-Digital</option>
+                        <option value="INSTR_NOT_REPEAT">Instrument - Not Repeated</option>
+                        <option value="INSTR_NOT_SELF_REPORT">Instrument - Not Self-Report</option>
+                        <option value="OTHER_DUPLICATE">Other - Duplicate</option>
+                        <option value="OTHER_404">Other - Paper Not Found</option>
+                        <option value="OTHER_REASONS">Other - Specific Reasons</option>
+                        <option value="STUDY_PILOT">Study - Feasibility/Pilot/Exploratory</option>
+                        <option value="STUDY_IRRELEVANT">Study - Irrelevant</option>
+                        <option value="STUDY_CASE_REPORT">Study - Case Report</option>
+                        <option value="STUDY_NON_ENGLISH">Study - Non-English</option>
+                        <option value="STUDY_OTHER_ARTICLES">Study - Opinions, Conceptual, Theoretical Articles, Brief Report</option>
+                        <option value="STUDY_PROTOCOL">Study - Protocol</option>
+                        <option value="STUDY_QUALITATIVE">Study - Qualitative</option>
+                        <option value="STUDY_SECOND_ANALYSIS">Study - Secondary Analysis</option>
+                        <option value="_UNKNW_INSTR_LANG">Follow-up - Unknown Instrument Language</option>
+                        <option value="_UNKNW_IN_OUT">Follow-up - Grey List</option>
+                    </select>
+
+                    <br>
+                    <button type="button" id="reject-btn" class="reject">Reject this article</button>
+
+                </div>   
+                
+                <div class="form-field">
+                    <label for="comment">Comment</label><br>
+                    <textarea style="width: 80%;" name="comment" rows="5">{{ article.comment if article.comment is not none else '' }}</textarea>
+                </div>   
+        
+            </div>
+
+            <div style="width: 95%; text-align: center;">
+                <button  type="button" onclick="return save();" class="save" >Save</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                <button  type="button" class="next" onclick="javascript:proceed_to_extraction()">Proceed to Extraction</button>
+            </div>            
+        </div>
+
+        <div id="second-page" style="display: none;">
+            <h3>Step 2 - Extract information from the article based on the fields below</h3>
+            <p class="instruction">Read through the article and extract information for each fields below. Please fill in all information and put N/A if not applicable or cannot find the information required (except Comment field)</p>
+
+            <div class="half-panel">
+                <div class="form-field">
+                    <label for="study_type">Study Type</label>
+                    <input type="text" name="study_type" value="{{ article.study_type if article.study_type  }}" placeholder="e.g., Cross-sectional, Longitudinal"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="study_design">Study Design</label>
+                    <input type="text" name="study_design" value="{{ article.study_design if article.study_design }}" placeholder="e.g., RCT, Repeated Cross-Sectional, Experience Sampling"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="study_period">Data Collection Periods</label>
+                    <input type="text" name="study_period" value="{{ article.study_period if article.study_period }}" placeholder="e.g., from May 2021 to Sep 2021, (list all periods if multiple periods)"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="target_population">Target Population</label>
+                    <input type="text" name="target_population" value="{{ article.target_population if article.target_population  }}" placeholder="e.g., 128 single older adults, 80 Protestant ministry workers"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="sample_size">Sample Size (Final)</label>
+                    <input type="text" name="sample_size" value="{{ article.sample_size if article.sample_size}}" placeholder="Final sample size for each survey administration"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="country">Countries</label>
+                    <input type="text" name="country" value="{{ article.country if article.country  }}" placeholder="e.g., Australia, UK, US (list all countries if more than one)"></input>
+                </div>
+
+                <div class="form-field">
+                    <label for="demographics">Demographics</label>
+                    <textarea name="demographics" rows="3" placeholder="e.g., Sex, Age Range, Job roles (normally can copy from the section 'Particpants')">{{ article.demographics if article.demographics}}</textarea>
+                </div>            
+
+                <div class="form-field">
+                    <label for="settings">Settings</label>
+                    <input type="text" name="settings" value="{{ article.settings if article.settings}}" placeholder="e.g., Rural, Urban, Community, Home"></input>
+                </div>            
+
+                <div class="form-field">
+                    <label for="extract_comment">Comment</label>
+                    <textarea name="extract_comment" rows="3" >{{ article.extract_comment if article.extract_comment}}</textarea>
+                </div>   
+
+            </div>
+
+            <div class="half-panel">
+                <h3>Instruments used</h3>
+
+                <table id="instruments" class="hover row-border" style="width: 100%;">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Constructs</th>
+                        <th>Mode</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                </table>
+
+                <button type="button" id="add-instrument">Add</button>
+
+            </div>
+
+            <div style="width: 95%; text-align: center;">
+                <button type="button" class="back" onclick="javascript:back_to_page_one()">Back to Step 1</button>&nbsp;&nbsp;&nbsp;
+
+                <button type="button" class="save" onclick="return save();">Save</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                <button type="button" onclick="return complete();" class="submit"><i class="fa-solid fa-circle-check"></i>Submit and Complete</button>
+            </div>            
+        </div>
+
+
+        <input type="hidden" value="{{ article.id }}" name="id" />
+        <input type="hidden" name="instruments_json" />
+        <input type="hidden" name="status" value="{{ article.status if article.status  }}" />
+
+        <hr/>
+
+        <span id="errorMessage"></span><br/>
+
+
+
+    </form>
+
+    <div id="display-papers-dialog" style="display: none;">
+        <h3>Related Papers</h3>
+
+        <table id="related-papers" class="hover row-border" style="width: 100%;">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>DOI</th>
+                <th></th>
+              </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div class="edit-dialog" id="edit-dialog-form" style="display: none;">
+        <form>
+            <div class="form-field">
+                <label for="instrument_name">Instrument name</label>
+                <input id="instrument_name" type="text" name="instrument_name"></input>
+            </div>
+            <div class="form-field">
+                <label for="admin_mode">Modality</label>
+                <select name="admin_mode" id="admin_mode" >
+                    <option value="">--- Please select ---</option>
+                    <option value="ONLINE">Online websites/portal using own devices</option>
+                    <option value="MOBILE_APP">Mobile Apps</option>
+                    <option value="LAPTOP">Laptop (In-person) provided by researchers</option>
+                    <option value="TABLET">Tablet (In-person) provided by researchers</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="admin_frequency">Admin Frequency</label>
+                <input id="admin_frequency" type="text" name="admin_frequency" placeholder="e.g., Daily, five times per week, every two months""></input>
+            </div>
+            <div class="form-field">
+                <label for="structure">Structure</label>
+                <textarea id="structure" name="structure" rows="2" placeholder="e.g., Factors/dimensions and any sub-scale."></textarea>
+            </div>
+            <div class="form-field">
+                <label for="number_of_items">Number of Items</label>
+                <input id="number_of_items" name="number_of_items" type="text" placeholder="If it contains sub-scales, list the total and the number of items for each sub-scale."></input>
+            </div>
+            <div class="form-field">
+                <label for="version">Version</label>
+                <input id="version" type="text" placeholder="Short-form, long-form or version number, e.g. BDI-2"></input>
+            </div>
+            <div class="form-field">
+                <label for="response_format">Response Format</label>
+                <textarea id="response_format" name="response_format" rows="2" placeholder="e.g., Five-point Likert Scale"></textarea>
+            </div>
+            <div class="form-field">
+                <label for="modifications">Any modifications done?</label>
+                <textarea id="modifications" name="modifications" rows="2" placeholder="e.g., Any modifications done to the original scale? E.g., wording changes, only 3 questions from the X sub-scale were used."></textarea>
+            </div>
+            <div class="form-field">
+                <label for="terms_of_use">Terms of use</label>
+                <select name="terms_of_use" id="terms_of_use" >
+                    <option value="">--- Please select ---</option>
+                    <option value="FREE">Free</option>
+                    <option value="PAID">Paid</option>
+                    <option value="PERMISSION">Ask for permissions</option>
+                    <option value="NON_COMMERCIAL">Non-commercial</option>
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="construct_measured">Constructs</label>
+                <textarea id="construct_measured" name="construct_measured" rows="3" placeholder="If researchers normally list the measurements at their own heading in the Methods section, e.g., depressive symptoms. Also, read the Results section and how they described the constructs and make inference and recorded here. E.g., Measured depressive symptoms and use this as a proxy to mental health (result/discussion)"></textarea>
+            </div>
+            <div class="form-field">
+                <label for="rationale">Rationale/Other Info</label>
+                <textarea id="rationale" name="rationale" rows="2" placeholder="If the researchers described why they chose certain instruments, e.g., because the instrument is free, the instrument is widely used."></textarea>
+            </div>
+            <div class="form-field">
+                <label for="theoretical_framework">Theoretical/conceptual framework</label>
+                <textarea id="theoretical_framework" name="theoretical_framework" rows="2" placeholder="Theoretical/conceptual framework of the instrument (if mentioned in the article). E.g., this instrument is based on X model."></textarea>
+            </div>            
+            
+            <input id="rowIndex" value="-1" type="hidden" />
+        </form>
+
+    </div>
+
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script
+  src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+  integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+  crossorigin="anonymous"></script>
+    
+    <script>
+        jQuery.ajaxSetup({
+        beforeSend: function() {
+            $('#loader').show();
+        },
+        complete: function(){
+            $('#loader').hide();
+        },
+        success: function() {}
+        });
+
+        dialog = $( "#edit-dialog-form" ).dialog({
+            autoOpen: false,
+            height: 800,
+            width: 1200,
+            modal: true,
+            buttons: {
+                "Save instrument": addInstrument,
+                Cancel: function() {
+                    dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                resetDialog();
+                //allFields.removeClass( "ui-state-error" );
+            }
+        });
+
+        display_paper_dialog = $( "#display-papers-dialog" ).dialog({
+            autoOpen: false,
+            height: 700,
+            width: 1200,
+            modal: false,
+            buttons: {
+                Cancel: function() {
+                    display_paper_dialog.dialog( "close" );
+                }
+            },
+            close: function() {
+                //allFields.removeClass( "ui-state-error" );
+            }
+        });
+
+        form = dialog.find( "form" ).on( "submit", function( event ) {
+            event.preventDefault();
+        });
+        
+        $( "#add-instrument" ).button().on( "click", function() {
+            dialog.dialog( "open" );
+
+            $( "#instrument_name" ).autocomplete({
+                source: "/query-instrument-names",
+                minLength: 2,
+                select: function( event, ui ) {
+                    log( "Selected: " + ui.item.value + " aka " + ui.item.id );
+                }
+            });            
+        });
+
+        $( "#show-papers" ).on( "click", function() {
+            $('#related-papers').DataTable({
+                bProcessing: true,
+                bServerSide: true,
+                sPaginationType: "full_numbers",
+                bjQueryUI: true,
+                dataSrc: '',
+                sAjaxSource: '/query-relevant-papers-data?parentPaperId={{article.id}}',
+                columns: [
+                    { "data": "id" },
+                    { "data": "title" },
+                    { "data": "doi" }
+                ],
+                rowCallback: function (row, data, index) {
+                }
+            });
+
+            display_paper_dialog.dialog( "open" );
+        });
+
+        $("#extract_link").click(function() {
+            $.getJSON("/auto_extract/{{ article.raw_doi | safe | replace('/', '==') }}", function (data) {
+                console.log(data);
+                var win = window.open("", "Info", "toolbar=no,location=no,directories=no,status=no,menubar=no,scrollbars=yes,resizable=yes,width=780,height=800");
+                win.document.body.innerHTML = data.data;
+            });
+        });
+
+        function validateFields() {
+            var data = instrument_table.rows().data();
+            var ins = [];
+            for (var i = 0; i < data.length; i++) {
+                ins.push(instrument_table.row(i).data());
+            }
+
+            $("input[name='instruments_json']").val(JSON.stringify(ins));
+            return true;
+        }
+
+        function proceed_to_extraction() {
+            $("#first-page").hide();
+            $("#second-page").show();
+        }
+
+        function back_to_page_one() {
+            $("#first-page").show();
+            $("#second-page").hide();
+        }
+
+        var ins_str = {{ ins | safe | tojson}}
+        instruments = JSON.parse(ins_str)
+        var instrument_table = null;
+
+        $(document).ready(function() {
+            instrument_table = $('#instruments').DataTable({
+                "searching": false,
+                "paging": false,
+                "data": instruments,
+                "columns": [
+                    {"data": "instrument_name"},
+                    {"data": "construct_measured"},
+                    {"data": "admin_mode"},
+                    {"data": "instrument_name", 
+                    "render": function(data, type, row, meta) {
+                        if (type == 'display') {
+                            data = '<a href="javascript:void(0);" onclick="deleteRow(' + meta.row + ')">❌</a>&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="editRow(' + meta.row + ')">🗒</a>';
+                        }
+
+                        return data;
+                    }}
+                ]
+            });
+
+            $("#r_reject, #r_reject_second").change(function() {
+                var decision = $("input[name='r_reject_second']:checked").val()
+                if (decision && (decision == "Reject-Second")) {
+                    $("#reject_reason_div").show();
+                    $()
+                } else {
+                    $("#reject_reason_div").hide();
+                }   
+            });
+
+            
+                         
+        });
+
+        function save() {
+            $("input[name='status']").val("SAVE");
+            $("#main_form").submit();
+        }
+
+        function complete() {
+            $("input[name='status']").val("COMPLETE");
+            $("#main_form").submit();
+        }
+
+        function deleteRow(rowNumber) {
+            instrument_table.row(rowNumber).remove().draw();
+        }
+
+        function editRow(rowNumber) {
+            var row = instrument_table.row(rowNumber);
+            console.log(row.data());
+            populateDialog(rowNumber, row.data());
+            dialog.dialog( "open" );
+        }        
+
+        function populateDialog(rowNumber, instrument) {
+            $("#instrument_name").val(instrument["instrument_name"]);
+            $("#admin_mode").val(instrument["admin_mode"]);
+            $("#admin_frequency").val(instrument["admin_frequency"]);
+            $("#structure").val(instrument["structure"]);
+            $("#number_of_items").val(instrument["number_of_items"]);
+            $("#version").val(instrument["version"]);
+            $("#response_format").val(instrument["response_format"]);
+            $("#modifications").val(instrument["modifications"]);
+            $("#terms_of_use").val(instrument["terms_of_use"]);
+            $("#construct_measured").val(instrument["construct_measured"]);
+            $("#rationale").val(instrument["rationale"]);
+            $("#theoretical_framework").val(instrument["theoretical_framework"]);
+            $("#rowIndex").val(rowNumber);          
+        }
+
+        function addInstrument() {
+            var rowIndex = parseInt($("#rowIndex").val());
+            var instrument = {}
+            if (rowIndex != -1) {
+                 instrument = instrument_table.row(parseInt($("#rowIndex").val())).data();
+            }
+
+            instrument["instrument_name"] = $("#instrument_name").val();
+            instrument["admin_mode"] = $("#admin_mode").val();
+            instrument["admin_frequency"] = $("#admin_frequency").val();
+            instrument["structure"] = $("#structure").val();
+            instrument["number_of_items"] = $("#number_of_items").val();
+            instrument["version"] = $("#version").val();
+            instrument["response_format"] = $("#response_format").val();
+            instrument["modifications"] = $("#modifications").val();
+            instrument["terms_of_use"] = $("#terms_of_use").val();
+            instrument["construct_measured"] = $("#construct_measured").val();
+            instrument["rationale"] = $("#rationale").val();
+            instrument["theoretical_framework"] = $("#theoretical_framework").val();
+
+            if (rowIndex != -1) {
+                instrument_table.row(rowIndex).data(instrument);
+            } else {
+                instrument_table.row.add(instrument);
+            }
+
+            instrument_table.draw();
+
+            resetDialog();
+            dialog.dialog("close");
+        }
+        
+        function resetDialog() {
+            $( "#edit-dialog-form form" )[0].reset();
+            $("#rowIndex").val("-1");
+        }
+        
+    </script>
+  {% endblock %}
+
+{% endblock %}

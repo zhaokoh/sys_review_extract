@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block content %}
+
+  <h2>{{q.title}}</h2>
+  <p>Last run {{q.wos_last_run_date}}</p>
+  <p style="color: grey; font-size: x-small;">{{q.query}}</p>
+
+  <table id='search_results' class="row-border hover" style='width:100%'>
+    <thead>
+      <tr>
+          <th>Title</th>
+          <th>Authors</th>
+          <th>Year</th>
+          <th>DOI</th>
+          <th>In PP?</th>
+          <th>PP tags</th>
+          <th>Note</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for index, row in q.result.iterrows() %}
+        <tr>
+          <td><a target="_blank" href="https://scholar.google.com/scholar?as_q={{row['title']}}">{{row['title']}}</a></td>
+          <td>{{row['authors']}}</td>
+          <td>{{row['published_year']}}</td>
+          <td><a target="_blank" href="https://scholar.google.com/scholar?as_q={{row['doi']}}">{{row['doi']}}</a></td>
+            {% if row['match_doi'] is not none or row['ppStatus'] is not none %}
+            <td style='background-color: rgb(103, 199, 103); text-align:center;'><a target="_blank" href="https://paperpile.com/app/p/{{row['_id']}}">✔️</a></td>
+            {% elif row['doi'] is none and row['match_doi'] is none %}
+              <td style='background-color: beige; text-align:center;'>!</td>
+            {%  elif row['match_doi'] is none %}
+              <td style='background-color: red; text-align:center;'>╳</td>
+              {% else %}
+              <td>?</td>
+            {% endif %}
+          </td>
+          {% if row['ppStatus'] == '_rejected' %}
+            <td style='background-color: rgb(255, 192, 192); text-align:center;'>{{row['ppStatus']}}</td>
+          {% elif row['ppStatus'] is not none and 'Reading Queue' in row['ppStatus'] %}
+          <td style='background-color: rgb(254, 254, 179); text-align:center;'>{{row['ppStatus']}}</td>
+          {% elif row['ppStatus'] is not none and '_pending_export_filed' in row['ppStatus'] %}
+            <td style='background-color: rgb(198, 249, 198); text-align:center;'>{{row['ppStatus']}}</td>
+          {% elif row['ppStatus'] == '_ignored_for_now' %}
+            <td style='background-color: rgb(227, 227, 227); text-align:center;'>{{row['ppStatus']}}</td>
+          {% elif row['ppStatus'] is not none and '_in_bookends' in row['ppStatus'] %}
+            <td style='background-color: rgb(225, 254, 207); text-align:center;'>{{row['ppStatus']}}</td>
+          {% else %}
+          <td>{{row['ppStatus']}}</td>
+          {% endif %}
+          <td>
+            {% if row['note'] != 'None' %}
+              {{row['note']}}
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#search_results').DataTable({
+        "stateSave": true,
+        "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+        "order" : [[ 4, "desc"]]
+        
+      });   
+    } );
+  </script>
+  {% endblock %}
+
+{% endblock %}

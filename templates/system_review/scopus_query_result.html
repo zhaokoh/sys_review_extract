@@ -1,0 +1,115 @@
+{% extends "layout.html" %}
+{% block content %}
+
+  <style>
+    tr.reject, tr.reject-second {
+      background-color:rgb(255, 220, 226) !important;
+    }
+    
+    tr.pass {
+      background-color:rgb(206, 255, 199) !important;
+    }
+
+    tr.maybe {
+      background-color:rgb(252, 252, 202) !important;
+    }
+    
+    #total_outstanding {
+      color: grey;
+      font-weight: bold;
+    }
+
+    #total_completed {
+      color: black;
+      font-weight: bold;
+    }
+
+    #total_pass {
+      color: green;
+    }
+
+    #total_maybe {
+      color:orange;
+    }
+
+    #total_reject, #total_reject_second {
+      color:red;
+    }
+    
+  </style>
+
+  <div class="summary" style="font-size: xx-large; margin-bottom: 50px;">
+    Total: <span id='total_count'></span>  (Outstanding: <span id='total_outstanding'></span> Completed: <span id='total_completed'></span> -   
+    Pass: <span id='total_pass'></span>
+    Maybe: <span id='total_maybe'></span>
+    Reject: <span id='total_reject'></span>
+    Reject (Second Screening): <span id='total_reject_second'></span>  )
+  </div>
+
+  <table id="search_results" class="hover row-border" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Year</th>
+        <th>DOI</th>
+        <th>Decision</th>
+      </tr>
+    </thead>
+  </table>
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+
+      $.getJSON("/scopus-query-summary", function (data) {
+        $("#total_count").html(data.recordsTotal);
+        $("#total_pass").html(data.recordsPass);
+        $("#total_reject").html(data.recordsReject);
+        $("#total_reject_second").html(data.recordsRejectSecond);
+        $("#total_maybe").html(data.recordsMaybe);
+        $("#total_outstanding").html(data.recordsOutstanding);
+        $("#total_completed").html(parseInt(data.recordsTotal) - parseInt(data.recordsOutstanding));
+      });
+
+
+      $('#search_results').DataTable({
+        "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+        bProcessing: true,
+        bServerSide: true,
+        sPaginationType: "full_numbers",
+        bjQueryUI: true,
+        dataSrc: '',
+        sAjaxSource: '/scopus-query-data',
+        columns: [
+          {"data": "id"},
+          {"data": "title"},
+          {"data": "published_year"},
+          {"data": "doi"},
+          {"data": "decision"},
+        ],
+        rowCallback: function(row, data, index) {
+          if (data.decision) {
+            $(row).addClass(data.decision.toLowerCase());
+          }
+        }
+      });   
+    } );
+
+    function show_abs(id, title) {
+      id = id.replace(":", "\\:")
+      id = id.replace(".", "\\.")
+
+      var win = window.open($(this).attr("href"), "popupWindow", "width=800,height=600,scrollbars=yes")
+      win.document.body.innerHTML = 
+      "<h1>" + title + "</h1>" +
+      "<span style='font-size: small'>" + id + "</span><br><br>" +
+      $("#abs-" + id).html();
+    }
+  </script>
+  {% endblock %}
+
+{% endblock %}

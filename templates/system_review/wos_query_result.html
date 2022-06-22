@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block content %}
+
+  <table id="search_results" class="hover row-border" style="width: 100%;">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>DOI</th>
+        <th>Abstract</th>
+      </tr>
+    </thead>
+  </table>
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#search_results').DataTable({
+        "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+        bProcessing: true,
+        bServerSide: true,
+        sPaginationType: "full_numbers",
+        bjQueryUI: true,
+        dataSrc: '',
+        sAjaxSource: '/wos-query-data',
+        columns: [
+          {"data": "ID"},
+          {"data": "title"},
+          {"data": "author"},
+          {"data": "doi"},
+          {"data": "abstract"},
+        ]    
+      });   
+    } );
+
+    function show_abs(id, title) {
+      id = id.replace(":", "\\:")
+
+      var win = window.open($(this).attr("href"), "popupWindow", "width=800,height=600,scrollbars=yes")
+      win.document.body.innerHTML = 
+      "<h1>" + title + "</h1>" +
+      "<span style='font-size: small'>" + id + "</span><br><br>" +
+      $("#abs-" + id).html();
+    }
+  </script>
+  {% endblock %}
+
+{% endblock %}

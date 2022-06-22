@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block content %}
+
+  <!--<p>Search Query: {{q.query}}</p>-->
+  <table id='search_results' class="row-border hover" style='width:100%'>
+    <thead>
+      <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Authors</th>
+          <th>Year</th>
+          <th>DOI</th>
+          <th>Journal</th>
+          <th>Cited #</th>
+          <th>Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for index, row in q.result.iterrows() %}
+        <tr>
+          <td>@{{row['citekey']}}</td>
+          <td><a target="_blank" href="https://paperpile.com/app/p/{{row['_id']}}">{{row['title']}}</a></td>
+          <td>{{row['author']}}</td>
+          <td>{{row['year']}}</td>
+          <td><a target="_blank" href="{{row['url']}}">{{row['doi']}}</a></td>
+          <td>{{row['journal']}}</td>
+          <td>{{row['gs_cited_by_count']}}</td>
+          <td>{{row['ppStatus']}}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $('#search_results').DataTable({
+        "autoWidth": false,
+        columnDefs: [
+            { width: 150, targets: 0 },
+            { width: 500, targets: 1 },
+            { width: 300, targets: 2 }
+        ],
+        fixedColumns: true
+      });   
+    } );
+
+    hover_row_id = null;
+
+    $('#search_results tr').hover(
+      function() {
+      hover_row_id = $(this).find("td:first").text();
+    }, function() {
+      hover_row_id = null;
+    });
+
+    $(document).on("keydown", function(e){
+      if (e.keyCode == 67 && (e.ctrlKey || e.metaKey)){
+        copyToClipboard(hover_row_id);
+      }
+
+      if (e.keyCode == 70) {
+        if ($('input[type = "search"]').is(":focus")) {
+          // Do nothing (allow user to enter f)
+        } else {
+          $('input[type = "search"]').focus();
+          return false;
+        }
+      }
+    });  
+    
+    function copyToClipboard(text) {
+      var dummy = document.createElement("textarea");
+      // to avoid breaking orgain page when copying more words
+      // cant copy when adding below this code
+      // dummy.style.display = 'none'
+      document.body.appendChild(dummy);
+      //Be careful if you use texarea. setAttribute('value', value), which works with "input" does not work with "textarea". – Eduard
+      dummy.value = text;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+    } 
+  </script>
+  {% endblock %}
+
+{% endblock %}
