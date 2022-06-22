@@ -24,7 +24,6 @@ from fuzzywuzzy import process
 from jinja2 import Template
 from lxml import etree
 from lxml.etree import tostring
-from model.scopus import ScopusItem, ScopusQuery, ScopusQueryItem
 from pybliometrics.scopus import ScopusSearch
 from pybliometrics.scopus.utils import config
 from sqlalchemy import (Column, Date, DateTime, Float, Integer, MetaData,
@@ -32,7 +31,6 @@ from sqlalchemy import (Column, Date, DateTime, Float, Integer, MetaData,
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
-from util.dateutil_custom import DateUtil
 
 template_dir = os.path.abspath('templates/system_review')
 static_dir = os.path.abspath('images')
@@ -862,6 +860,6 @@ def homepage():
 #ui = WebUI(app, debug=True) # Create a WebUI instance
 
 if __name__ == '__main__':
-    app.run(debug=True, host = socket.gethostname(), port=5555)
+    app.run(debug=True, host = "127.0.0.1", port=5555)
     #ui.run()
 
