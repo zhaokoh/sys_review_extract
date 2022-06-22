@@ -594,7 +594,7 @@ def submit_extract_item():
                 #url = "/scopus-item/extract/%s" % eid
                 
             else:
-                sql = ("insert into %s (id, decision, reject_reason, study_type, study_design, study_period, target_population, country, sample_size, demographics, settings,  comment, extract_comment, cri_adults, cri_comm_dwellers, cri_article_peer_review, cri_article_english, cri_quan_emp_study, cri_repeated_instr, status, created_date, last_modified_date) values ('%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d, '%s', datetime('now'), datetime('now')) " % 
+                sql = ("insert into %s (id, decision, reject_reason, study_type, study_design, study_period, target_population, country, sample_size, demographics, settings,  comment, extract_comment, cri_adults, cri_comm_dwellers, cri_article_peer_review, cri_article_english, cri_quan_emp_study, cri_repeated_instr, status, created_date, last_modified_date) values ('%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d, '%s', datetime('now'), datetime('now')) " % 
                 (db_table_extract, 
                 id, decision, reject_reason, encode_sql(engine, study_type), 
                 encode_sql(engine, study_design),

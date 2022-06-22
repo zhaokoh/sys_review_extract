@@ -594,7 +594,7 @@
             });
 
             var reject_reasons = '{{ article.reject_reason }}';
-            if (reject_reasons && reject_reasons.length > 0) {
+            if (reject_reasons && reject_reasons != 'None' && reject_reasons.length > 0) {
                 $("input[name='r_reject_second']").prop("checked", true);
                 $("#reject_reason_div").show();
             }
