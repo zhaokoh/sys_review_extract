@@ -229,7 +229,7 @@
                     </select>
 
                     <br>
-                    <button type="button" id="reject-btn" class="reject">Reject this article</button>
+                    <button type="button" onclick="return reject_article();" id="reject-btn" class="reject">Reject this article</button>
 
                 </div>   
                 
@@ -243,7 +243,7 @@
             <div style="width: 95%; text-align: center;">
                 <button  type="button" onclick="return save();" class="save" >Save</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
-                <button  type="button" class="next" onclick="javascript:proceed_to_extraction()">Proceed to Extraction</button>
+                <button  type="button" class="next" onclick="return proceed_to_extraction()">Proceed to Extraction</button>
             </div>            
         </div>
 
@@ -530,7 +530,24 @@
             return true;
         }
 
+        function all_criteria_satisfied() {
+            return $("#first-page input[name*='cri_']:checked").length == 6;
+        }
+
         function proceed_to_extraction() {
+
+            if (!all_criteria_satisfied()) {
+                alert("Please checked all the inclusion criteria to continue OR reject this article.");
+
+                return false;
+            }
+
+            var decision = $("input[name='r_reject_second']:checked").val();
+            if (decision && (decision == "Reject-Second")) {
+                alert("Cannot proceed if this article is marked to be rejected.");
+                return false;
+            }
+
             $("#first-page").hide();
             $("#second-page").show();
         }
@@ -568,11 +585,23 @@
                 var decision = $("input[name='r_reject_second']:checked").val()
                 if (decision && (decision == "Reject-Second")) {
                     $("#reject_reason_div").show();
-                    $()
+                    
                 } else {
                     $("#reject_reason_div").hide();
+                    $("select[name='reject_reason']").val("");
+
                 }   
             });
+
+            var reject_reasons = '{{ article.reject_reason }}';
+            if (reject_reasons && reject_reasons.length > 0) {
+                $("input[name='r_reject_second']").prop("checked", true);
+                $("#reject_reason_div").show();
+            }
+
+            $.each(reject_reasons.split(","), function(i, e) {
+                $("select[name='reject_reason'] option[value='" + e.trim() + "']").prop("selected", true);
+            });            
 
             
                          
@@ -580,6 +609,11 @@
 
         function save() {
             $("input[name='status']").val("SAVE");
+            $("#main_form").submit();
+        }
+
+        function reject_article() {
+            $("input[name='status']").val("REJECT");
             $("#main_form").submit();
         }
 

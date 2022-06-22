@@ -528,6 +528,17 @@ def submit_extract_item():
 
         status = request.form.get('status')
 
+        reject_reason = ""
+        decision = ""
+
+        if status == "COMPLETE":
+            decision = "Pass"
+        elif status == "REJECT":
+            decision = "Reject-Second"
+            reject_reason = request.form.get('reject_reason')
+        elif status == "SAVE":
+            reject_reason = request.form.get('reject_reason')
+
         session = None
         url = "/scopus-query-pass"
 
@@ -537,6 +548,8 @@ def submit_extract_item():
 
             if existing_record > 0:
                 sql = ("update %s set \
+                    decision='%s', \
+                    reject_reason='%s', \
                     study_type=%s, \
                     study_design=%s, \
                     study_period=%s, \
@@ -556,6 +569,8 @@ def submit_extract_item():
                     status='%s', \
                     last_modified_date=datetime('now') where id='%s'" %
                 (db_table_extract,
+                decision,
+                reject_reason,
                 encode_sql(engine, study_type), 
                 encode_sql(engine, study_design), 
                 encode_sql(engine, study_period), 
@@ -579,9 +594,9 @@ def submit_extract_item():
                 #url = "/scopus-item/extract/%s" % eid
                 
             else:
-                sql = ("insert into %s (id, study_type, study_design, study_period, target_population, country, sample_size, demographics, settings,  comment, extract_comment, cri_adults, cri_comm_dwellers, cri_article_peer_review, cri_article_english, cri_quan_emp_study, cri_repeated_instr, status, created_date, last_modified_date) values ('%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d, '%s', datetime('now'), datetime('now')) " % 
+                sql = ("insert into %s (id, decision, reject_reason, study_type, study_design, study_period, target_population, country, sample_size, demographics, settings,  comment, extract_comment, cri_adults, cri_comm_dwellers, cri_article_peer_review, cri_article_english, cri_quan_emp_study, cri_repeated_instr, status, created_date, last_modified_date) values ('%s', '%s', '%s', %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, %d, %d, '%s', datetime('now'), datetime('now')) " % 
                 (db_table_extract, 
-                id, encode_sql(engine, study_type), 
+                id, decision, reject_reason, encode_sql(engine, study_type), 
                 encode_sql(engine, study_design),
                 encode_sql(engine, study_period), 
                 encode_sql(engine, target_population), 
@@ -647,7 +662,7 @@ def submit_extract_item():
     #     return redirect("/scopus-next-extract", code=302)
     # else:
     #     return "<html><head></head><body onload='window.close();'>Record is updated successfully.</body></html>"
-    if status == "COMPLETE":
+    if status == "COMPLETE" or status == "REJECT":
         url = "/"
     else:
         url = "/scopus-item/extract/%s" % id
