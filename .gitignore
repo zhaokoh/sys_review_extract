@@ -1,3 +1,4 @@
 data/**
 sys_review_zhao.db
 nohup.out
+.DS_Store
