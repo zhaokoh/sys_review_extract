@@ -7,35 +7,32 @@ import logging
 import math
 import os
 import re
-import pandas as pd
 import shutil
 import socket
 import sys
 import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime
-
 from difflib import SequenceMatcher
-from flask import Flask, render_template, jsonify, request, redirect
+from os import listdir
+from os.path import isfile, join
+from re import S
+
+import pandas as pd
+from flask import Flask, jsonify, redirect, render_template, request
 from fuzzywuzzy import process
-from libraries.grobid_client.grobid_client import GrobidClient
 from jinja2 import Template
 from lxml import etree
 from lxml.etree import tostring
 from model.scopus import ScopusItem, ScopusQuery, ScopusQueryItem
-from os import listdir
-from os.path import isfile, join
 from pybliometrics.scopus import ScopusSearch
 from pybliometrics.scopus.utils import config
-from libraries.scihub.scihub import SciHub
-from re import S
 from sqlalchemy import (Column, Date, DateTime, Float, Integer, MetaData,
                         String, Table, and_, create_engine, or_)
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import func
 from util.dateutil_custom import DateUtil
-
 
 template_dir = os.path.abspath('templates/system_review')
 static_dir = os.path.abspath('images')
