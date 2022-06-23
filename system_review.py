@@ -625,7 +625,7 @@ def submit_extract_item():
             instruments = json.loads(instruments_json)
 
             for i in instruments:
-                new_ins_sql = ("insert into %s (id, instrument_name, instrument_ref_year, admin_mode, admin_frequency, structure, number_of_items, version, response_format, modifications, terms_of_use, construct_measured, rationale, theoretical_framework, created_date, last_modified_date) values ('%s', %s, %s, '%s', %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s, datetime('now'), datetime('now')) " % 
+                new_ins_sql = ("insert into %s (id, instrument_name, instrument_ref_year, admin_mode, admin_frequency, structure, number_of_items, version, response_format, measured_duration, modifications, terms_of_use, construct_measured, rationale, theoretical_framework, created_date, last_modified_date) values ('%s', %s, %s, '%s', %s, %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s, datetime('now'), datetime('now')) " % 
                 (db_table_instr_extract,
                 id, 
                 encode_sql(engine, i['instrument_name']), 
@@ -636,6 +636,7 @@ def submit_extract_item():
                 encode_sql(engine, i['number_of_items']), 
                 encode_sql(engine, i['version']), 
                 encode_sql(engine, i['response_format']), 
+                encode_sql(engine, i['measured_duration']),                 
                 encode_sql(engine, i['modifications']), 
                 i['terms_of_use'], 
                 encode_sql(engine, i['construct_measured']),
