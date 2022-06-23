@@ -677,7 +677,10 @@ def submit_extract_item():
 
 
 def encode_sql(engine, s):
-    return String('').literal_processor(dialect=engine.dialect)(s)
+    if s is not None:
+        return String('').literal_processor(dialect=engine.dialect)(s)
+    else:
+        return "NULL"
 
 @app.route("/submit_scopus_item", methods = ["POST"])
 def submit_scopus_item():
