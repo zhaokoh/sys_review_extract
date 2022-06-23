@@ -361,6 +361,10 @@
                 <input id="instrument_name" type="text" name="instrument_name"></input>
             </div>
             <div class="form-field">
+                <label for="instrument_ref_year">Instrument Citation and Year</label>
+                <input id="instrument_ref_year" type="text" name="instrument_ref_year"></input>
+            </div>
+            <div class="form-field">
                 <label for="admin_mode">Modality</label>
                 <select name="admin_mode" id="admin_mode" >
                     <option value="">--- Please select ---</option>
@@ -635,6 +639,7 @@
 
         function populateDialog(rowNumber, instrument) {
             $("#instrument_name").val(instrument["instrument_name"]);
+            $("#instrument_ref_year").val(instrument["instrument_ref_year"]);
             $("#admin_mode").val(instrument["admin_mode"]);
             $("#admin_frequency").val(instrument["admin_frequency"]);
             $("#structure").val(instrument["structure"]);
@@ -657,6 +662,7 @@
             }
 
             instrument["instrument_name"] = $("#instrument_name").val();
+            instrument["instrument_ref_year"] = $("#instrument_ref_year").val();
             instrument["admin_mode"] = $("#admin_mode").val();
             instrument["admin_frequency"] = $("#admin_frequency").val();
             instrument["structure"] = $("#structure").val();

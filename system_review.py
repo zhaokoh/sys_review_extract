@@ -623,10 +623,11 @@ def submit_extract_item():
             instruments = json.loads(instruments_json)
 
             for i in instruments:
-                new_ins_sql = ("insert into %s (id, instrument_name, admin_mode, admin_frequency, structure, number_of_items, version, response_format, modifications, terms_of_use, construct_measured, rationale, theoretical_framework, created_date, last_modified_date) values ('%s', %s, '%s', %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s, datetime('now'), datetime('now')) " % 
+                new_ins_sql = ("insert into %s (id, instrument_name, instrument_ref_year, admin_mode, admin_frequency, structure, number_of_items, version, response_format, modifications, terms_of_use, construct_measured, rationale, theoretical_framework, created_date, last_modified_date) values ('%s', %s, %s, '%s', %s, %s, %s, %s, %s, %s, '%s', %s, %s, %s, datetime('now'), datetime('now')) " % 
                 (db_table_instr_extract,
                 id, 
                 encode_sql(engine, i['instrument_name']), 
+                encode_sql(engine, i['instrument_ref_year']), 
                 i['admin_mode'], 
                 encode_sql(engine, i['admin_frequency']), 
                 encode_sql(engine, i['structure']), 
