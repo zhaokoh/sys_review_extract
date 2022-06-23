@@ -19,6 +19,10 @@
       font-weight: bold;
     }
 
+    #total_save {
+      color: rgb(0, 86, 190);
+    }
+
     #total_completed {
       color: black;
       font-weight: bold;
@@ -39,7 +43,7 @@
   </style>
 
   <div class="summary" style="font-size: xx-large; margin-bottom: 50px;">
-    Total: <span id='total_count'></span>  (Outstanding: <span id='total_outstanding'></span> Completed: <span id='total_completed'></span> -   
+    Total: <span id='total_count'></span>  (Outstanding: <span id='total_outstanding'></span> Save: <span id='total_save'></span> Completed: <span id='total_completed'></span> -   
     Pass: <span id='total_pass'></span>
     Reject: <span id='total_reject_second'></span>)
   </div>
@@ -68,6 +72,7 @@
         $("#total_pass").html(data.recordsPass);
         $("#total_reject_second").html(data.recordsRejectSecond);
         $("#total_outstanding").html(data.recordsOutstanding);
+        $("#total_save").html(data.recordsSave);
         $("#total_completed").html(parseInt(data.recordsTotal) - parseInt(data.recordsOutstanding));
       });
 

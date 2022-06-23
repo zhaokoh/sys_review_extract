@@ -223,6 +223,7 @@ def home_summary():
         total_reject_second = engine.scalar("select count(*) from %s where decision == 'Reject-Second'" % db_view_scopus)
         total_pass = engine.scalar("select count(*) from %s where decision == 'Pass'" % db_view_scopus)
         total_maybe = engine.scalar("select count(*) from %s where decision == 'Maybe'" % db_view_scopus)
+        total_save = engine.scalar("select count(*) from %s where status == 'SAVE'" % db_view_scopus)
 
         q = {}
         q['recordsTotal'] = total_result
@@ -230,6 +231,7 @@ def home_summary():
         q['recordsReject'] = total_reject
         q['recordsRejectSecond'] = total_reject_second
         q['recordsMaybe'] = total_maybe
+        q['recordsSave'] = total_save
         q['recordsOutstanding'] = total_result - total_pass - total_reject - total_reject_second - total_maybe
 
         return json.dumps(q, ensure_ascii=True)
