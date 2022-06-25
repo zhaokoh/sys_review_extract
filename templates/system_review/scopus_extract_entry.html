@@ -273,13 +273,13 @@
                 </div>
 
                 <div class="form-field">
-                    <label for="sample_size">Sample Size (Final)</label>
-                    <input type="text" name="sample_size" value="{{ article.sample_size if article.sample_size}}" placeholder="Final sample size for each survey administration"></input>
+                    <label for="country">Countries</label>
+                    <input type="text" name="country" value="{{ article.country if article.country  }}" placeholder="e.g., Australia, UK, US (list all countries if more than one)"></input>
                 </div>
 
                 <div class="form-field">
-                    <label for="country">Countries</label>
-                    <input type="text" name="country" value="{{ article.country if article.country  }}" placeholder="e.g., Australia, UK, US (list all countries if more than one)"></input>
+                    <label for="sample_size">Sample Size (Final)</label>
+                    <input type="text" name="sample_size" value="{{ article.sample_size if article.sample_size}}" placeholder="Final sample size for each survey administration"></input>
                 </div>
 
                 <div class="form-field">
@@ -365,6 +365,10 @@
                 <input id="instrument_ref_year" type="text" name="instrument_ref_year"></input>
             </div>
             <div class="form-field">
+                <label for="number_of_items">Number of Items</label>
+                <input id="number_of_items" name="number_of_items" type="text" placeholder="If it contains sub-scales, list the total and the number of items for each sub-scale."></input>
+            </div>
+            <div class="form-field">
                 <label for="admin_mode">Modality</label>
                 <select name="admin_mode" id="admin_mode" >
                     <option value="">--- Please select ---</option>
@@ -387,16 +391,12 @@
                 <input id="version" type="text" placeholder="Short-form, long-form or version number, e.g. BDI-2"></input>
             </div>
             <div class="form-field">
-                <label for="structure">Structure/Scoring</label>
-                <textarea id="structure" name="structure" rows="2" placeholder="e.g., Factors/dimensions and any sub-scale, and any scoring information."></textarea>
-            </div>
-            <div class="form-field">
-                <label for="number_of_items">Number of Items</label>
-                <input id="number_of_items" name="number_of_items" type="text" placeholder="If it contains sub-scales, list the total and the number of items for each sub-scale."></input>
-            </div>
-            <div class="form-field">
                 <label for="response_format">Response Format</label>
                 <textarea id="response_format" name="response_format" rows="1" placeholder="e.g., Five-point Likert Scale"></textarea>
+            </div>
+            <div class="form-field">
+                <label for="structure">Structure/Scoring</label>
+                <textarea id="structure" name="structure" rows="2" placeholder="e.g., Factors/dimensions and any sub-scale, and any scoring information."></textarea>
             </div>
             <div class="form-field">
                 <label for="measured_duration">Measured Duration</label>
@@ -422,7 +422,7 @@
             </div>
             <div class="form-field">
                 <label for="theoretical_framework">Theoretical/conceptual framework</label>
-                <textarea id="theoretical_framework" name="theoretical_framework" rows="2" placeholder="Theoretical/conceptual framework of the instrument (if mentioned in the article). E.g., this instrument is based on X model."></textarea>
+                <textarea id="theoretical_framework" name="theoretical_framework" rows="2" placeholder="Theoretical/conceptual framework of the instrument (if mentioned in the article). E.g., this instrument is based on X model, diagnostic criteria in DSM-IV."></textarea>
             </div>            
             
             <input id="rowIndex" value="-1" type="hidden" />
