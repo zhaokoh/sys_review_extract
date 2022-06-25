@@ -119,6 +119,11 @@
             color: white; 
         }
 
+        button.ignore {
+            background-color: rgb(255, 145, 0); 
+            color: rgb(255, 255, 255); 
+        }
+
         button.next, button.submit {
             background-color: rgb(35, 111, 41); 
             color: white; 
@@ -236,6 +241,7 @@
                 <div class="form-field">
                     <label for="comment">Comment</label><br>
                     <textarea style="width: 80%;" name="comment" rows="5">{{ article.comment if article.comment is not none else '' }}</textarea>
+                    <button type="button" onclick="return ignoreReview();" class="ignore" >This is a review/meta-analysis. Ignore for now.</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                    
                 </div>   
         
             </div>
@@ -254,7 +260,7 @@
             <div class="half-panel">
                 <div class="form-field">
                     <label for="study_type">Study Type</label>
-                    <input type="text" name="study_type" value="{{ article.study_type if article.study_type  }}" placeholder="e.g., Cross-sectional, Longitudinal"></input>
+                    <input type="text" name="study_type" value="{{ article.study_type if article.study_type  }}" placeholder="e.g., Cross-sectional, Longitudinal, Experimental"></input>
                 </div>
 
                 <div class="form-field">
@@ -330,6 +336,10 @@
         <input type="hidden" value="{{ article.id }}" name="id" />
         <input type="hidden" name="instruments_json" />
         <input type="hidden" name="status" value="{{ article.status if article.status  }}" />
+
+        {% if request.args.get('next_item_mode') is defined %}
+            <input type="hidden" name="next_item_mode" value="true" />
+        {% endif %}
 
         <hr/>
 
@@ -611,12 +621,20 @@
                 $("select[name='reject_reason'] option[value='" + e.trim() + "']").prop("selected", true);
             });            
 
-            
+            {% if request.args.get('next_item_mode') is defined %}
+                $('#main-menu li.active').removeClass("active");
+                $("#main-menu li:nth-child(3)").addClass("active");                
+            {% endif %}            
                          
         });
 
         function save() {
             $("input[name='status']").val("SAVE");
+            $("#main_form").submit();
+        }
+
+        function ignoreReview() {
+            $("input[name='status']").val("IGNORE_REVIEW");
             $("#main_form").submit();
         }
 

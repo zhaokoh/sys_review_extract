@@ -193,6 +193,10 @@ def process_one_scopus(df):
 def wos_query():
     return render_template('wos_query_result.html')
 
+@app.route("/save-query")
+def save_query():
+    return render_template('save_list.html')
+
 @app.route("/scopus-query")
 def scopus_query():
     return render_template('scopus_query_result.html')    
@@ -249,6 +253,10 @@ def scopus_queries_data():
 @app.route("/scopus-query-data-pass")
 def scopus_queries_data_pass():
     return _scopus_query_data(include_decisions=['Pass'], xtra_criteria=["extract_id is null"])
+
+@app.route("/query-save")
+def query_save():
+    return _scopus_query_data(xtra_criteria=["status = 'SAVE'"])
 
 @app.route("/scopus-query-data-pass-review")
 def scopus_queries_data_pass_review():
@@ -531,6 +539,7 @@ def submit_extract_item():
         cri_repeated_instr = request.form.get('cri_repeated_instr')
 
         status = request.form.get('status')
+        is_next_item_mode = request.form.get("next_item_mode")
 
         reject_reason = ""
         decision = ""
@@ -668,10 +677,16 @@ def submit_extract_item():
     #     return redirect("/scopus-next-extract", code=302)
     # else:
     #     return "<html><head></head><body onload='window.close();'>Record is updated successfully.</body></html>"
-    if status == "COMPLETE" or status == "REJECT":
-        url = "/"
+    if status == "COMPLETE" or status == "REJECT" or status == "IGNORE_REVIEW":
+        if is_next_item_mode == "true":
+            url = "/next-item"
+        else: 
+            url = "/"
     else:
-        url = "/scopus-item/extract/%s" % id
+        if is_next_item_mode == "true":
+            url = "/scopus-item/extract/%s?next_item_mode=true" % id
+        else:
+            url = "/scopus-item/extract/%s" % id
 
     return redirect(url, code = 302)
 
@@ -806,6 +821,37 @@ def scopus_open_item(id):
     finally:
         if session is not None:
             session.close()   
+
+
+@app.route("/next-item", methods = ["GET"])
+def next_item():
+    session = None
+
+    try:
+        engine = create_engine('sqlite:///' + repository_path)  
+
+        Session = sessionmaker(bind = engine)
+        session = Session()
+
+        total_extract_outstanding = engine.scalar("select count(*) from %s where decision is null and extract_id is null" % db_view_scopus)
+        sql = ("select * from %s where decision is null and extract_id is null order by published_year desc limit 1" % db_view_scopus)
+
+        df = pd.read_sql(sql, con=engine)
+        df = process_one_scopus(df)
+        q = {}
+
+        if len(df) > 0:
+            q = df.iloc[0]
+
+        id = q['id']
+        url = "/scopus-item/extract/%s?next_item_mode=true" % q['id']
+        return redirect(url, code = 302)
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    finally:
+        if session is not None:
+            session.close()
 
 @app.route("/scopus-next-extract", methods = ["GET"])
 def scopus_next_extract():

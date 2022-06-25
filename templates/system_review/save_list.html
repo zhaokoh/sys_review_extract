@@ -18,38 +18,10 @@
       background-color:rgb(252, 252, 202) !important;
     }
     
-    #total_outstanding {
-      color: grey;
-      font-weight: bold;
-    }
-
-    #total_save {
-      color: rgb(0, 86, 190);
-    }
-
-    #total_completed {
-      color: black;
-      font-weight: bold;
-    }
-
-    #total_pass {
-      color: green;
-    }
-
-    #total_maybe {
-      color:orange;
-    }
-
-    #total_reject, #total_reject_second {
-      color:red;
-    }
-    
   </style>
 
   <div class="summary" style="font-size: xx-large; margin-bottom: 50px;">
-    Total: <span id='total_count'></span>  (Outstanding: <span id='total_outstanding'></span> Save: <span id='total_save'></span> Completed: <span id='total_completed'></span> -   
-    Pass: <span id='total_pass'></span>
-    Reject: <span id='total_reject_second'></span>)
+    Items in 'SAVE' status
   </div>
 
   <table id="search_results" class="hover row-border" style="width: 100%;">
@@ -70,16 +42,6 @@
   <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
   <script>
     $(document).ready(function() {
-    
-      $.getJSON("/home-summary", function (data) {
-        $("#total_count").html(data.recordsTotal);
-        $("#total_pass").html(data.recordsPass);
-        $("#total_reject_second").html(data.recordsRejectSecond);
-        $("#total_outstanding").html(data.recordsOutstanding);
-        $("#total_save").html(data.recordsSave);
-        $("#total_completed").html(parseInt(data.recordsTotal) - parseInt(data.recordsOutstanding));
-      });
-
 
       $('#search_results').DataTable({
         "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
@@ -90,7 +52,7 @@
         stateSave: true,
         order: [[2, 'desc']],
         dataSrc: '',
-        sAjaxSource: '/scopus-query-data',
+        sAjaxSource: '/query-save',
         columns: [
           {"data": "id"},
           {"data": "title"},
@@ -105,12 +67,12 @@
           if (data.status) {
             $(row).addClass(data.status.toLowerCase());
           }
-        }        
-      });
-      
+        }
+      });   
+
       $('#main-menu li.active').removeClass("active");
-      $("#main-menu li:nth-child(1)").addClass("active");
-      
+      $("#main-menu li:nth-child(2)").addClass("active");
+
     } );
 
     function show_abs(id, title) {
