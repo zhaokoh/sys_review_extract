@@ -332,7 +332,7 @@
         <input type="hidden" name="instruments_json" />
         <input type="hidden" name="status" value="{{ article.status if article.status  }}" />
 
-        {% if request.args.get('next_item_mode') is defined %}
+        {% if request.args.get('next_item_mode') is defined and request.args.get('next_item_mode') == "true" %}
             <input type="hidden" name="next_item_mode" value="true" />
         {% endif %}
 
