@@ -35,7 +35,7 @@
               <a class="nav-link" href="/save-query">Save List</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/next-item">Let's Screen</a>
+              <a class="nav-link" href="/next-item">Let's Screen {% if total_extract_outstanding is defined %}(<span>{{ total_extract_outstanding }}</span>){% endif %}</a>
             </li>
           </ul>
         </div>

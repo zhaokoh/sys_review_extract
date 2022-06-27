@@ -833,7 +833,6 @@ def next_item():
         Session = sessionmaker(bind = engine)
         session = Session()
 
-        total_extract_outstanding = engine.scalar("select count(*) from %s where decision is null and extract_id is null" % db_view_scopus)
         sql = ("select * from %s where decision is null and extract_id is null order by published_year desc limit 1" % db_view_scopus)
 
         df = pd.read_sql(sql, con=engine)
@@ -896,6 +895,12 @@ def scopus_open_item_extract(id):
         Session = sessionmaker(bind = engine)
         session = Session()
 
+        total = engine.scalar("select count(*) from %s" % db_view_scopus)
+        total_pass = engine.scalar("select count(*) from %s where decision == 'Pass'" % db_view_scopus)
+        total_reject = engine.scalar("select count(*) from %s where decision == 'Reject-Second'" % db_view_scopus)
+        total_save = engine.scalar("select count(*) from %s where status == 'SAVE'" % db_view_scopus)
+        total_extract_outstanding = total - total_pass - total_reject - total_save
+        
         sql = ("select * from %s where id = '" + id + "'") % db_view_scopus
 
         df = pd.read_sql(sql, con=engine)
@@ -911,7 +916,7 @@ def scopus_open_item_extract(id):
 
         print(instruments_json)
         
-        return render_template('scopus_extract_entry.html', article = q, ins = instruments_json)  
+        return render_template('scopus_extract_entry.html', article = q, ins = instruments_json, total_extract_outstanding = total_extract_outstanding)  
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise

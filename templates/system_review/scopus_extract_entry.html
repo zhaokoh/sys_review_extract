@@ -145,11 +145,6 @@
 
     </style>
 
-    {% if total_extract_outstanding is defined %}
-    <div class="outstanding_indicator">Outstanding (Extract): <span>{{ total_extract_outstanding }}</span></div>        
-    {% endif %}
-
-
     <form id="main_form" action="{{ url_for('submit_extract_item') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateFields();">       
         
         <div id="loader" style="display: none;">
