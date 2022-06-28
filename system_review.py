@@ -273,8 +273,6 @@ def query_relevant_papers_data():
 
         sql = ("select id, title, published_year, doi from %s where parent_paper_id = '%s'" % ("sr_custom_paper", request.args.get('parentPaperId')))
 
-        print(sql)
-
         df = pd.read_sql(sql, con=engine)
         recordsFiltered = len(df)
 
@@ -381,8 +379,6 @@ def _scopus_query_data(include_decisions = [], xtra_criteria=[]):
         col_names[sortingColIndex],
         sortDirection
         ))
-
-        print(sql)
 
         df = pd.read_sql(sql, con=engine)
         recordsFiltered = len(df)
@@ -497,7 +493,6 @@ def submit_custom_paper_item():
             encode_sql(engine, parent_paper_id)
         ))
         with engine.connect() as con:
-            print(sql)
             con.execute(sql)
 
     except:
@@ -514,7 +509,7 @@ def submit_custom_paper_item():
 
 @app.route("/submit_extract_item", methods = ["POST"])
 def submit_extract_item():
-    print(request.form)
+    # print(request.form)
 
     id = request.form.get('id')
 
@@ -655,7 +650,6 @@ def submit_extract_item():
                 ins_insert_sqls.append(new_ins_sql)
 
             with engine.connect() as con:
-                print(sql)
                 con.execute(sql)
 
                 print(delete_ins_sql)
@@ -914,7 +908,7 @@ def scopus_open_item_extract(id):
         instruments_df = pd.read_sql(sql, con=engine)
         instruments_json = json.dumps([dict(v) for _, v in instruments_df.iterrows()])
 
-        print(instruments_json)
+        # print(instruments_json)
         
         return render_template('scopus_extract_entry.html', article = q, ins = instruments_json, total_extract_outstanding = total_extract_outstanding)  
     except:
