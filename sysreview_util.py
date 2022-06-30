@@ -14,7 +14,7 @@ class sysreview:
     {"key": "POP_SCHOOL", "label": "Population - School (up to High School)"}, \
     {"key": "INSTR_NON_ENGLISH", "label": "Instrument - Non-English"}, \
     {"key": "INSTR_NON_DIGITAL", "label": "Instrument - Non-Digital"}, \
-    {"key": "INSTR_NOT_REPEAT", "label": "Instrument - Not Repeated"}, \
+    {"key": "INSTR_NOT_REPEAT", "label": "Instrument - Not Repeated (e.g., cross-sectional study)"}, \
     {"key": "INSTR_NOT_SELF_REPORT", "label": "Instrument - Not Self-Report"}, \
     {"key": "OTHER_DUPLICATE", "label": "Other - Duplicate"}, \
     {"key": "OTHER_404", "label": "Other - Paper Not Found"}, \
