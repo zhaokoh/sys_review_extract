@@ -382,11 +382,12 @@
                     <option value="MOBILE_APP">Mobile Apps</option>
                     <option value="LAPTOP_COMPUTER">Laptop/Computer provided by researchers</option>
                     <option value="TABLET_PHONE">Tablet/Phone provided by researchers</option>
-                </select>
+                    <option value="ACASI">Audio Computer-Assisted Self-Interview system (ACASI)</option>
+                    </select>
             </div>
             <div class="form-field">
-                <label for="admin_frequency">Admin Frequency</label>
-                <input id="admin_frequency" type="text" name="admin_frequency" placeholder="e.g., Daily, five times per week, every two months""></input>
+                <label for="admin_frequency"><a href="javascript: populationFromLastInstrument();" title="Copy from last instrument">Admin Frequency</a></label>
+                <input id="admin_frequency" type="text" name="admin_frequency" placeholder="e.g., Daily, five times per week, every two months"></input>
             </div>
             <div class="form-field">
                 <label for="construct_measured">Constructs</label>
@@ -705,6 +706,16 @@
 
             resetDialog();
             dialog.dialog("close");
+        }
+
+        function populationFromLastInstrument() {
+            var rowIndex = parseInt($("#rowIndex").val());            
+            current_rows = instrument_table.rows().length
+
+            if (rowIndex == -1 && current_rows > 0) {
+                $("#admin_frequency").val(instrument_table.row(current_rows-1).data()["admin_frequency"]);
+            }
+
         }
         
         function resetDialog() {
