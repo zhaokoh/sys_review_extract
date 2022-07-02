@@ -184,6 +184,7 @@ def process_scopus_df(df):
 def process_one_scopus(df):
     #df['title'] = df.apply(lambda row : format_title(row), axis = 1)
     df['raw_doi'] = df['doi']
+
     df['doi'] = df.apply(lambda row : format_doi(row), axis = 1)
     df['status'] = df.apply(lambda row: format_status(row), axis = 1)
     df['description'] = ""
@@ -228,6 +229,7 @@ def home_summary():
         total_pass = engine.scalar("select count(*) from %s where decision == 'Pass'" % db_view_scopus)
         total_maybe = engine.scalar("select count(*) from %s where decision == 'Maybe'" % db_view_scopus)
         total_save = engine.scalar("select count(*) from %s where status == 'SAVE'" % db_view_scopus)
+        total_ignore_review = engine.scalar("select count(*) from %s where status == 'IGNORE_REVIEW'" % db_view_scopus)
 
         q = {}
         q['recordsTotal'] = total_result
@@ -236,7 +238,8 @@ def home_summary():
         q['recordsRejectSecond'] = total_reject_second
         q['recordsMaybe'] = total_maybe
         q['recordsSave'] = total_save
-        q['recordsOutstanding'] = total_result - total_pass - total_reject - total_reject_second - total_maybe
+        q['recordsIgnoreReview'] = total_ignore_review
+        q['recordsOutstanding'] = total_result - total_pass - total_reject - total_reject_second - total_maybe - total_ignore_review
 
         return json.dumps(q, ensure_ascii=True)
     except:
@@ -830,15 +833,18 @@ def next_item():
         sql = ("select * from %s where decision is null and extract_id is null order by published_year desc limit 1" % db_view_scopus)
 
         df = pd.read_sql(sql, con=engine)
-        df = process_one_scopus(df)
-        q = {}
-
         if len(df) > 0:
-            q = df.iloc[0]
+            df = process_one_scopus(df)
+            q = {}
 
-        id = q['id']
-        url = "/scopus-item/extract/%s?next_item_mode=true" % q['id']
-        return redirect(url, code = 302)
+            if len(df) > 0:
+                q = df.iloc[0]
+
+            id = q['id']
+            url = "/scopus-item/extract/%s?next_item_mode=true" % q['id']
+            return redirect(url, code = 302)
+        else:
+            return render_template('no_more_item_to_screen.html')  
     except:
         print("Unexpected error:", sys.exc_info()[0])
         raise
@@ -893,7 +899,8 @@ def scopus_open_item_extract(id):
         total_pass = engine.scalar("select count(*) from %s where decision == 'Pass'" % db_view_scopus)
         total_reject = engine.scalar("select count(*) from %s where decision == 'Reject-Second'" % db_view_scopus)
         total_save = engine.scalar("select count(*) from %s where status == 'SAVE'" % db_view_scopus)
-        total_extract_outstanding = total - total_pass - total_reject - total_save
+        total_ignore_review = engine.scalar("select count(*) from %s where status == 'IGNORE_REVIEW'" % db_view_scopus)
+        total_extract_outstanding = total - total_pass - total_reject - total_save - total_ignore_review
         
         sql = ("select * from %s where id = '" + id + "'") % db_view_scopus
 

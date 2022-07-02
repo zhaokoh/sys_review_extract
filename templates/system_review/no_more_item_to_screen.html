@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.11.3/datatables.min.css"/>
+<link rel="stylesheet" type="text/css" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+
+    <style>
+        h3 {
+            font-size: x-large;
+            color:rgb(203, 122, 0);
+        }
+
+        h4 {
+            font-size: large;
+            font-weight: bold;
+            color: grey;
+            padding-top: 15px;
+        }
+        
+    </style>
+
+
+    <p>No more item to screen. Well done! Redirect you back to the Home screen in <span id="progressBar">10</span> seconds. Please wait....</p>
+
+  {% block javascript %}
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+  <script src="//cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+  <script
+  src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+  integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+  crossorigin="anonymous"></script>
+    
+    <script>
+
+        function redirectToHome() {
+            window.location.replace('{{ url_for('homepage') }}');
+        }
+
+        $(document).ready(function() {
+            var timeleft = 10;
+            var downloadTimer = setInterval(function(){
+                if(timeleft <= 0){
+                    clearInterval(downloadTimer);
+                    redirectToHome();
+                }
+
+                document.getElementById("progressBar").innerHTML = timeleft;
+                timeleft -= 1;
+            }, 1000);
+
+            //setTimeout(redirectToHome, 10000);
+        });
+
+    </script>
+  {% endblock %}
+
+{% endblock %}

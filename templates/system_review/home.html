@@ -49,7 +49,8 @@
   <div class="summary" style="font-size: xx-large; margin-bottom: 50px;">
     Total: <span id='total_count'></span>  (Outstanding: <span id='total_outstanding'></span> Save: <span id='total_save'></span> Completed: <span id='total_completed'></span> -   
     Pass: <span id='total_pass'></span>
-    Reject: <span id='total_reject_second'></span>)
+    Reject: <span id='total_reject_second'></span>
+    Review (Ignore): <span id='total_ignore_review'></span>)
   </div>
 
   <table id="search_results" class="hover row-border" style="width: 100%;">
@@ -77,6 +78,7 @@
         $("#total_reject_second").html(data.recordsRejectSecond);
         $("#total_outstanding").html(data.recordsOutstanding);
         $("#total_save").html(data.recordsSave);
+        $("#total_ignore_review").html(data.recordsIgnoreReview);
         $("#total_completed").html(parseInt(data.recordsTotal) - parseInt(data.recordsOutstanding));
       });
 
