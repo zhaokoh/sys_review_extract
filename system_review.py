@@ -310,9 +310,11 @@ def query_instrument_names():
         Session = sessionmaker(bind = engine)
         session = Session()
 
-        sql = ("select distinct instrument_name from (select instrument_name from sr_instrument_extract union \
-                select instrument_name from fts_instrument_extract \
-                ) where lower(instrument_name) like '%" + search_term.lower() + "%' order by instrument_name")
+        # sql = ("select distinct instrument_name from (select instrument_name from sr_instrument_extract union \
+        #         select instrument_name from fts_instrument_extract \
+        #         ) where lower(instrument_name) like '%" + search_term.lower() + "%' order by instrument_name")
+
+        sql = ("select instrument_name from vw_instruments where lower(instrument_name) like '%" + search_term.lower() + "%' order by instrument_name")
 
         df = pd.read_sql(sql, con=engine)
         return json.dumps(df["instrument_name"].tolist(), ensure_ascii=True)

@@ -588,7 +588,7 @@
                     {"data": "instrument_name", 
                     "render": function(data, type, row, meta) {
                         if (type == 'display') {
-                            data = '<a href="javascript:void(0);" onclick="deleteRow(' + meta.row + ')">❌</a>&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="editRow(' + meta.row + ')">🗒</a>';
+                            data = '<a href="javascript:void(0);" onclick="deleteRow(' + meta.row + ');">❌</a>&nbsp;&nbsp;&nbsp;<a href="javascript:void(0);" onclick="editRow(' + meta.row + ')">🗒</a>';
                         }
 
                         return data;
@@ -646,7 +646,9 @@
         }
 
         function deleteRow(rowNumber) {
-            instrument_table.row(rowNumber).remove().draw();
+            if (confirm("Are you sure you want to delete this row?")) {
+                instrument_table.row(rowNumber).remove().draw();
+            }
         }
 
         function editRow(rowNumber) {
