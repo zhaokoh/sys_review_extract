@@ -143,6 +143,20 @@
             display: none;
         }
 
+        .hover-text {
+            position: absolute;
+            display: none;
+            z-index: 1;
+            max-width: 500px;
+            background-color: rgb(255, 255, 213);
+            padding: 10px;
+            font-size: small;
+            font-weight: bold;
+        }
+
+        .exclusion-criteria {
+            color: red;
+        }
     </style>
 
     <form id="main_form" action="{{ url_for('submit_extract_item') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateFields();">       
@@ -167,31 +181,51 @@
                 <h4>Population</h4>
 
                 <input type="checkbox" id="cri_adults" name="cri_adults" {% if article.cri_adults==1 %}checked{% endif %}/>
-                <label for="cri_adults">Adults aged 18+ OR majority are adults?</label><br/>
+                <label for="cri_adults">Adults aged 18 or above? 
+                    <i class="fa-solid fa-circle-question"></i><div class="hover-text">For example, a study that recruits participants (young adults) aged between 16 and 25 will be included. Studies involving sub-population groups, for example, grouped by occupational or socio-demographical, will also be included. <span class="exclusion-criteria">Studies that exclusively target infants, children and adolescents will be excluded.</span></div>
+                </label><br/>
 
                 <input type="checkbox" id="cri_comm_dwellers" name="cri_comm_dwellers" {% if article.cri_comm_dwellers==1 %}checked{% endif %}/>
-                <label for="cri_comm_dwellers">Community dwellers?</label><br/>
+                <label for="cri_comm_dwellers">Community dwellers? 
+                    <i class="fa-solid fa-circle-question"></i><div class="hover-text">Studies of clinical populations, including those with physical and mental health conditions will be included, as long as the sample population is living in the community. <span class="exclusion-criteria">individuals not residing in the community (e.g., inpatients, prisoners, military personnel during deployment) will be excluded.</span></div>
+                </label><br/>
 
                 <h4>Article types</h4>
 
                 <input type="checkbox" id="cri_article_peer_review" name="cri_article_peer_review" {% if article.cri_article_peer_review==1 %}checked{% endif %}/>
-                <label for="cri_article_peer_review">Peer-reviewed journal articles or book chapters?</label><br/>
+                <label for="cri_article_peer_review">Peer-reviewed journal articles or book chapters?
+                    <i class="fa-solid fa-circle-question"></i><div class="hover-text">Included studies must be published in the format of peer-reviewed journal articles, review articles (systematic review, literature review, scoping review, integrative review, meta-analyses) or book chapters. <span class="exclusion-criteria">Studies that were not peer-reviewed or published as pre-prints, case reports, opinions, conceptual or theoretical discussion articles will be excluded.</span></div>
+                </label><br/>
 
                 <input type="checkbox" id="cri_article_english" name="cri_article_english" {% if article.cri_article_english==1 %}checked{% endif %}/>
-                <label for="cri_article_english">Published in English?</label><br/>
+                <label for="cri_article_english">Published in English?
+                    <i class="fa-solid fa-circle-question"></i><div class="hover-text"><span class="exclusion-criteria">Studies that were not published in English will be excluded.</span></div>
+
+                    
+                </label><br/>
 
                 <h4>Study Design</h4>
 
                 <input type="checkbox" id="cri_quan_emp_study" name="cri_quan_emp_study" {% if article.cri_quan_emp_study==1 %}checked{% endif %}/>
-                <label for="cri_quan_emp_study">Quantitative empirical studies OR reviews?</label><br/>
+                <label for="cri_quan_emp_study">Quantitative empirical studies OR reviews?
+                    <i class="fa-solid fa-circle-question"></i><div class="hover-text">Study designs are likely to include population-based longitudinal studies, repeated cross-sectional studies, multi-waves surveys, cohort studies (retrospective/prospective), case-control studies, mixed-method studies, scale evaluation studies, quantitative randomised and non-randomised controlled trials (pre-post measurements after any intervention/treatment, e.g., psychological, medication). <span class="exclusion-criteria">Secondary analyses of previously collected surveys, feasibility, pilot, proof-of-concept, exploratory studies, qualitative studies, case studies and protocol for research studies or review protocols will be excluded.</span></div>
+                </label><br/>
 
                 <input type="checkbox" id="cri_repeated_instr" name="cri_repeated_instr" {% if article.cri_repeated_instr==1 %}checked{% endif %}/>
-                <label for="cri_repeated_instr">Has at least one instrument that matches ALL of the following:</label>
+                <label for="cri_repeated_instr">Has at least one instrument in <u>English</u> that matches ALL of the following:</label>
                 <ul>
-                    <li>Administered more than one time points?</li>
-                    <li>Self-report?</li>
-                    <li>Digital?</li>
-                    <li>Measure relevant mental health constructs?</li>
+                    <li>Administered more than one time points?
+                        <i class="fa-solid fa-circle-question"></i><div class="hover-text">This covers empirical studies measuring mental health constructs of the same individuals (within-person) or the same groups (within-group) at more than one time point, except studies that administered a single wave of a national survey that had been administered in the past.<span class="exclusion-criteria">Studies that administered a mental health instrument at one time point only (e.g., single-wave cross-sectional survey, screening participants) will be excluded.</span></div>
+                    </li>
+                    <li>Self-report / Self-administered?
+                        <i class="fa-solid fa-circle-question"></i><div class="hover-text">Mental health instruments that are self-reported and self-administered will be included. <span class="exclusion-criteria">Studies that are administered by a third person will be excluded. Studies that used self-report instruments as third-party observations such as proxy-report instruments (e.g., parent’s self-report on a child's behaviours) will be excluded.</span></div>
+                    </li>
+                    <li>Digital?
+                        <i class="fa-solid fa-circle-question"></i><div class="hover-text">The administration of digital (online websites, mobile apps, health kiosks) self-report and self-administered mental health instruments. <span class="exclusion-criteria">Studies that administered a mental health instrument in pen-and-paper, face-to-face/telephone interview will be excluded.</span></div>
+                    </li>
+                    <li>Measure relevant <a target="_blank" href="https://liveswinburneeduau-my.sharepoint.com/:b:/r/personal/zkoh_swin_edu_au/Documents/1%20-%20Projects/Systematic%20Review/Full-Text%20Screening%20and%20Data%20Extraction/315%20-%20Inclusion%20and%20Exclusion%20Criteria%20Checklist%20V2.pdf?csf=1&web=1&e=o07pa9">mental health constructs</a>? 
+                        <i class="fa-solid fa-circle-question"></i><div class="hover-text">Click on the link 'mental health constructs' to see the mental health framework developed for this review.</div>                    
+                    </li>
                 </ul>
                 
             </div>
@@ -621,8 +655,15 @@
             {% if request.args.get('next_item_mode') is defined %}
                 $('#main-menu li.active').removeClass("active");
                 $("#main-menu li:nth-child(3)").addClass("active");                
-            {% endif %}            
-                         
+            {% endif %}    
+            
+            $("i.fa-circle-question").mouseover(function() {
+                $(this).parent().find("div.hover-text").show();
+            });
+
+            $("i.fa-circle-question").mouseout(function() {
+                $(this).parent().find("div.hover-text").hide();
+            });
         });
 
         function save() {
