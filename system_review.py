@@ -19,7 +19,7 @@ from os.path import isfile, join
 from re import S
 
 import pandas as pd
-from flask import Flask, jsonify, redirect, render_template, request
+from flask import Flask, jsonify, redirect, render_template, request, make_response
 from fuzzywuzzy import process
 from jinja2 import Template
 from lxml import etree
@@ -407,6 +407,38 @@ def _scopus_query_data(include_decisions = [], xtra_criteria=[]):
         if session is not None:
             session.close()                       
 
+@app.route("/export_csv", methods = ["GET"])
+def export_csv():
+    session = None
+    try:
+        engine = create_engine('sqlite:///' + repository_path)  
+
+        Session = sessionmaker(bind = engine)
+        session = Session()
+
+        sql = "select a.id, title, author, doi, published_year, status, reject_reason, comment, study_type, study_design, study_period, \
+            target_population, country, sample_size, demographics, settings, \
+            extract_comment, instrument_name, instrument_ref_year, admin_mode, admin_frequency, structure, number_of_items, version, response_format, \
+            measured_duration, modifications, terms_of_use, construct_measured, rationale, theoretical_framework from \
+            (select * from vw_fts_master_working order by published_year desc) a left join \
+            fts_instrument_extract b on a.id = b.id"
+
+        df = pd.read_sql(sql, con=engine)
+        csv_str = df.to_csv(index=False)
+
+        output = make_response(csv_str)
+        output.headers["Content-Disposition"] = "attachment; filename=export_%s.csv" % datetime.now().strftime("%Y%m%d_%H%M")
+        output.headers["Content-type"] = "text/csv"
+        return output
+    except:
+        print("Unexpected error:", sys.exc_info()[0])
+        raise
+    finally:
+        if session is not None:
+            session.close()   
+
+    
+    return None
 
 @app.route("/auto_extract/<doi>", methods = ["GET"])
 def auto_extract(doi):
