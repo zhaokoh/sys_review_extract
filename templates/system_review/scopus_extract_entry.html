@@ -158,6 +158,11 @@
         .exclusion-criteria {
             color: red;
         }
+
+        .ui-autocomplete {
+            background-color: rgb(255, 245, 231);
+        }
+
     </style>
 
     <form id="main_form" action="{{ url_for('submit_extract_item') }}" method="POST" enctype="multipart/form-data" onsubmit="return validateFields();">       
@@ -421,8 +426,8 @@
                     </select>
             </div>
             <div class="form-field">
-                <label for="admin_frequency"><a href="javascript: populationFromLastInstrument();" title="Copy from last instrument">Admin Frequency</a></label>
-                <textarea id="admin_frequency" rows="1" name="admin_frequency" placeholder="e.g., Daily, five times per week, every two months"></textarea>
+                <label for="admin_frequency"><a href="javascript: populationFromLastInstrument();" title="Copy from last instrument">Admin Frequency<sup>*</sup></a></label>
+                <textarea id="admin_frequency" rows="1" name="admin_frequency" placeholder="e.g., Daily, five times/week, every two months. Click the label to copy value from the first instrument."></textarea>
             </div>
             <div class="form-field">
                 <label for="construct_measured">Constructs</label>
@@ -536,7 +541,7 @@
                 source: "/query-instrument-names",
                 minLength: 2,
                 select: function( event, ui ) {
-                    log( "Selected: " + ui.item.value + " aka " + ui.item.id );
+                    console.log( "Selected: " + ui.item.value + " aka " + ui.item.id );
                 }
             });            
         });
